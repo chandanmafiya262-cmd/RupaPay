@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6c3ff2">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RupaPay Prototype</title>
+<style>
+:root{--p:#6c3ff2;--p2:#8b5cf6;--lav:#f3eeff;--gold:#ffb800;--ink:#171f2e;--muted:#737b91;--bg:#fbfaff;--card:#fff;--line:#ece8f7;--green:#21b779}
+*{box-sizing:border-box}body{margin:0;background:#eeeafa;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink)}
+.app{max-width:430px;min-height:100vh;margin:auto;background:var(--bg);box-shadow:0 0 40px #0001;position:relative;overflow:hidden}
+.top{padding:18px 18px 8px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:24px;font-weight:800}.brand span{color:var(--p)}
+.page{padding:12px 18px 92px}.logo{font-size:42px;font-weight:900;letter-spacing:-2px;text-align:center;margin:20px 0 4px}.logo span{color:var(--p)}.tag{text-align:center;color:var(--muted);margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 8px 24px #5b39a00d;margin-bottom:14px}
+.field{margin:12px 0}.field label{font-size:13px;font-weight:700;display:block;margin-bottom:7px}.field input{width:100%;padding:14px;border:1px solid #ded9ec;border-radius:13px;outline:none;font-size:15px;background:#fff}.field input:focus{border-color:var(--p)}
+.btn{width:100%;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;box-shadow:0 8px 18px #6c3ff233}.ghost{background:var(--lav);color:var(--p)}.small{padding:9px 12px;font-size:13px;width:auto}
+.center{text-align:center}.link{color:var(--p);font-weight:700;cursor:pointer}.muted{color:var(--muted)}
+.balance{background:linear-gradient(135deg,#6c3ff2,#8247e9);color:#fff;border-radius:25px;padding:20px;margin:12px 0 16px;box-shadow:0 14px 30px #6c3ff238}.balance .amt{font-size:38px;font-weight:900;margin:5px 0 14px}.row{display:flex;gap:10px}.row>*{flex:1}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{padding:14px;background:#fff;border:1px solid var(--line);border-radius:17px}.stat b{display:block;font-size:20px;margin-top:4px}
+.task{display:flex;align-items:center;gap:12px}.icon{width:48px;height:48px;border-radius:15px;background:var(--lav);display:grid;place-items:center;font-size:24px;flex:none}.task .grow{flex:1}.task h3{margin:0 0 4px;font-size:15px}.task p{margin:0;color:var(--muted);font-size:12px}.reward{color:var(--p);font-weight:800;font-size:12px;margin-top:5px}
+.nav{position:fixed;bottom:0;max-width:430px;width:100%;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px calc(10px + env(safe-area-inset-bottom));z-index:5}.nav button{background:none;border:0;color:#858ba0;font-weight:700;font-size:11px}.nav .active{color:var(--p)}
+.admin{background:#151022;color:#fff}.admin .card{background:#211a33;border-color:#3c3153}.admin .muted{color:#bdb5d0}.admin .field input{background:#171123;color:#fff;border-color:#4b3c62}
+.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#efeaff;color:var(--p);font-size:11px;font-weight:800}.danger{color:#e54d4d}.success{color:var(--green)}
+.hidden{display:none!important}.section-title{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px}.section-title h2{font-size:18px;margin:0}.back{border:0;background:none;font-size:22px;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:82px;transform:translateX(-50%);background:#171f2e;color:#fff;padding:11px 15px;border-radius:12px;font-size:13px;z-index:20;box-shadow:0 8px 25px #0003}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div id="login" class="page">
+    <div class="logo">Rupa<span>Pay</span></div>
+    <div class="tag">Tasks. Rewards. Real Earnings.</div>
+    <div class="card">
+      <h1 style="margin:0 0 4px">Welcome Back!</h1><p class="muted" style="margin-top:0">Login to continue</p>
+      <div class="field"><label>Mobile Number</label><input id="loginPhone" placeholder="Enter mobile number" inputmode="numeric"></div>
+      <div class="field"><label>Password</label><input id="loginPass" type="password" placeholder="Enter password"></div>
+      <button class="btn primary" onclick="login()">Login</button>
+      <p class="center muted">Don't have an account? <span class="link" onclick="show('signup')">Sign Up</span></p>
+      <button class="btn ghost" onclick="show('adminLogin')">Admin Panel</button>
+    </div>
+  </div>
+
+  <div id="signup" class="page hidden">
+    <div class="top"><button class="back" onclick="show('login')">‹</button><b>RupaPay</b><span></span></div>
+    <div class="logo" style="font-size:32px">Create Account</div><div class="tag">Join RupaPay</div>
+    <div class="card">
+      <div class="field"><label>Full Name</label><input id="suName" placeholder="Enter full name"></div>
+      <div class="field"><label>Mobile Number</label><input id="suPhone" placeholder="Enter mobile number" inputmode="numeric"></div>
+      <div class="field"><label>Email Address</label><input id="suEmail" placeholder="Enter email"></div>
+      <div class="field"><label>Password</label><input id="suPass" type="password" placeholder="Create password"></div>
+      <button class="btn primary" onclick="signup()">Create Account</button>
+      <p class="center muted">Already have an account? <span class="link" onclick="show('login')">Login</span></p>
+    </div>
+  </div>
+
+  <div id="home" class="hidden">
+    <div class="top"><div class="brand">Rupa<span>Pay</span></div><span>🔔</span></div>
+    <div class="page">
+      <h2 id="hello" style="margin:8px 0 0">Hi 👋</h2><p class="muted" style="margin-top:4px">Welcome Back!</p>
+      <div class="balance"><div>Available Balance</div><div class="amt" id="bal1">₹0.00</div><div class="row"><button class="btn ghost" onclick="show('wallet')">💸 Withdraw</button><button class="btn ghost" onclick="show('history')">📜 History</button></div></div>
+      <div class="stats"><div class="stat">Total Earnings<b id="earnStat">₹0.00</b></div><div class="stat">Tasks Completed<b id="taskStat">0</b></div></div>
+      <div class="section-title"><h2>🎯 Earn More</h2><span class="link" onclick="show('tasks')">View All ›</span></div>
+      <div id="homeTasks"></div>
+      <div class="card" style="background:var(--lav)"><b>🔥 Today's Progress</b><p class="muted">Complete tasks to earn rewards.</p><div style="height:8px;background:#fff;border-radius:8px;overflow:hidden"><div id="progress" style="height:100%;width:0;background:var(--p)"></div></div></div>
+    </div><Nav active="home"/>
+  </div>
+
+  <div id="tasks" class="hidden">
+    <div class="top"><div class="brand">Tasks</div><span class="badge">Rewards</span></div>
+    <div class="page"><p class="muted">Complete legitimate tasks to receive rewards.</p><div id="allTasks"></div></div><Nav active="tasks"/></div>
+
+  <div id="wallet" class="hidden">
+    <div class="top"><div class="brand">My Wallet</div></div>
+    <div class="page">
+      <div class="balance"><div>Wallet Balance</div><div class="amt" id="bal2">₹0.00</div></div>
+      <div class="row"><button class="btn primary" onclick="withdraw()">Withdraw</button><button class="btn ghost" onclick="toast('Transfer will be enabled after secure payment integration.')">Transfer</button></div>
+      <div class="section-title"><h2>Earnings Overview</h2></div>
+      <div class="card">Total Earnings <b id="earn2">₹0.00</b></div><div class="card">Tasks Completed <b id="task2">0</b></div>
+    </div><Nav active="wallet"/></div>
+
+  <div id="profile" class="hidden">
+    <div class="top"><div class="brand">Profile</div><span>⚙️</span></div>
+    <div class="page"><div class="card"><h2 id="profName">User</h2><p class="muted" id="profPhone"></p><span class="badge">Member</span></div>
+      <div class="card"><p>👤 Personal Information</p><p>💳 Payment Details</p><p>🎁 Refer & Earn</p><p>⚙️ Settings</p><p>🛟 Help & Support</p></div>
+      <button class="btn ghost" onclick="logout()">Logout</button>
+    </div><Nav active="profile"/></div>
+
+  <div id="history" class="hidden"><div class="top"><div class="brand">History</div></div><div class="page"><div id="historyList" class="card"><p class="muted">No transactions yet.</p></div></div><Nav active="wallet"/></div>
+
+  <div id="adminLogin" class="page hidden admin">
+    <div class="logo">Rupa<span style="color:#fff">Pay</span></div><div class="tag" style="color:#bdb5d0">Admin Control Center</div>
+    <div class="card"><h2>Admin Login</h2><p class="muted">Demo prototype only.</p>
+      <div class="field"><label>Admin PIN</label><input id="adminPin" type="password" placeholder="Enter demo PIN"></div>
+      <button class="btn primary" onclick="adminLogin()">Enter Admin Panel</button>
+      <p class="center"><span class="link" onclick="show('login')">Back to Login</span></p>
+    </div>
+  </div>
+
+  <div id="admin" class="hidden admin">
+    <div class="top"><div class="brand">Rupa<span style="color:#fff">Pay</span> Admin</div><button class="btn ghost small" onclick="logout()">Exit</button></div>
+    <div class="page">
+      <div class="card"><span class="badge">FULL DEMO CONTROL</span><h2>Dashboard</h2><p class="muted">Prototype controls for users, tasks and rewards.</p></div>
+      <div class="stats"><div class="stat">Users<b id="adminUsers">1</b></div><div class="stat">Tasks<b id="adminTasks">4</b></div></div>
+      <div class="section-title"><h2>Manage Tasks</h2></div>
+      <div id="adminTaskList"></div>
+      
+      <div class="section-title"><h2>Create Unlimited Tasks</h2></div>
+      <div class="card">
+        <div class="field"><label>Task Name</label><input id="newTaskName" placeholder="e.g. Daily Survey"></div>
+        <div class="field"><label>Description</label><input id="newTaskDesc" placeholder="Short task instructions"></div>
+        <div class="field"><label>Reward (demo ₹)</label><input id="newTaskReward" type="number" min="0" step="0.01" placeholder="5"></div>
+        <button class="btn primary" onclick="createTask()">➕ Add Task</button>
+      </div>
+<div class="section-title"><h2>Quick Controls</h2></div>
+      <div class="card">
+        <button class="btn primary" onclick="addDemoReward()">Add ₹10 Test Reward</button><br><br>
+        <button class="btn ghost" onclick="exportReport()">📊 Export Report</button><br><br>
+        <button class="btn ghost" onclick="resetDemo()">Reset Demo Data</button>
+      </div>
+      <p class="muted" style="font-size:12px">Security note: this is a browser-only prototype. Real admin control must be server-side with authentication and database rules before real money is used.</p>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+const DEFAULT_TASKS=[
+ {id:1,icon:'📱',name:'App Task',desc:'Complete an approved app task',reward:5},
+ {id:2,icon:'🎬',name:'Watch & Learn',desc:'Watch an approved video',reward:2},
+ {id:3,icon:'📝',name:'Survey',desc:'Complete an eligible survey',reward:10},
+ {id:4,icon:'🎁',name:'Daily Bonus',desc:'Claim your daily bonus',reward:3}
+];
+let TASKS=JSON.parse(localStorage.getItem('rupapay_tasks')||'null')||DEFAULT_TASKS;
+let state=JSON.parse(localStorage.getItem('rupapay_demo')||'null')||{
+ name:'Demo User',phone:'',email:'',balance:0,earnings:0,completed:0,history:[],completedIds:[],
+ users:[{id:1,name:'Demo User',phone:'',email:'',balance:0,status:'Active'}],
+ withdrawals:[], taskApprovals:[]
+};
+
+function save(){localStorage.setItem('rupapay_demo',JSON.stringify(state))}
+function money(n){return '₹'+Number(n).toFixed(2)}
+function show(id){
+ document.querySelectorAll('#app>div').forEach(x=>x.classList.add('hidden'));
+ document.getElementById(id).classList.remove('hidden');
+ if(['home','tasks','wallet','profile','history','admin'].includes(id)) render();
+}
+function Nav({active}){}
+function nav(active){
+ const m={home:'🏠 Home',tasks:'🎯 Tasks',wallet:'💰 Wallet',profile:'👤 Profile'};
+ return `<div class="nav">${Object.entries(m).map(([k,v])=>`<button class="${active===k?'active':''}" onclick="show('${k}')">${v}</button>`).join('')}</div>`
+}
+customElements.define('x-nav',class extends HTMLElement{connectedCallback(){this.innerHTML=nav(this.getAttribute('active'))}});
+function login(){state.phone=document.getElementById('loginPhone').value||state.phone;state.name=state.name||'User';save();show('home');toast('Login successful')}
+function signup(){const n=document.getElementById('suName').value.trim(),p=document.getElementById('suPhone').value.trim(),e=document.getElementById('suEmail').value.trim();if(!n||!p){toast('Name and mobile are required');return}state.name=n;state.phone=p;state.email=e;save();show('home');toast('Account created')}
+function logout(){show('login')}
+
+function saveTasks(){localStorage.setItem('rupapay_tasks',JSON.stringify(TASKS))}
+function createTask(){
+ const name=document.getElementById('newTaskName').value.trim();
+ const desc=document.getElementById('newTaskDesc').value.trim()||'Complete this approved task';
+ const reward=Number(document.getElementById('newTaskReward').value);
+ if(!name||!Number.isFinite(reward)||reward<0){toast('Enter a task name and valid reward');return}
+ ensureAdminData();
+ state.taskApprovals.unshift({id:Date.now(),icon:'🎯',name,desc,reward,status:'Pending'});
+ save(); render();
+ document.getElementById('newTaskName').value='';
+ document.getElementById('newTaskDesc').value='';
+ document.getElementById('newTaskReward').value='';
+ toast('Task added successfully');
+}
+function deleteTask(id){
+ TASKS=TASKS.filter(t=>t.id!==id); saveTasks(); render(); toast('Task removed');
+}
+
+function ensureAdminData(){
+ state.users=Array.isArray(state.users)?state.users:[{id:1,name:state.name||'Demo User',phone:state.phone||'',email:state.email||'',balance:state.balance||0,status:'Active'}];
+ state.withdrawals=Array.isArray(state.withdrawals)?state.withdrawals:[];
+ state.taskApprovals=Array.isArray(state.taskApprovals)?state.taskApprovals:[];
+}
+function approveTask(id){
+ const t=state.taskApprovals.find(x=>x.id===id); if(!t)return;
+ t.status='Approved';
+ TASKS.push({id:t.id,icon:'🎯',name:t.name,desc:t.desc,reward:t.reward});
+ saveTasks(); save(); render(); toast('Task approved');
+}
+function rejectTask(id){
+ const t=state.taskApprovals.find(x=>x.id===id); if(!t)return;
+ t.status='Rejected'; save(); render(); toast('Task rejected');
+}
+function submitDemoWithdrawal(){
+ if(state.balance<=0){toast('No balance available');return}
+ const amount=Math.min(10,state.balance);
+ state.balance-=amount;
+ state.withdrawals.unshift({id:Date.now(),user:state.name,amount,status:'Pending',date:new Date().toLocaleString(),method:'UPI (demo)'});
+ state.history.unshift({text:'Withdrawal request',amount:-amount,date:new Date().toLocaleString()});
+ ensureAdminData(); save(); render(); toast('Demo withdrawal submitted');
+}
+function approveWithdrawal(id){
+ const w=state.withdrawals.find(x=>x.id===id); if(!w)return;
+ w.status='Approved'; save(); render(); toast('Withdrawal marked approved');
+}
+function rejectWithdrawal(id){
+ const w=state.withdrawals.find(x=>x.id===id); if(!w)return;
+ w.status='Rejected'; save(); render(); toast('Withdrawal rejected');
+}
+function toggleUser(id){
+ const u=state.users.find(x=>x.id===id); if(!u)return;
+ u.status=u.status==='Active'?'Blocked':'Active'; save(); render(); toast('User status updated');
+}
+function exportReport(){
+ const report={
+  generatedAt:new Date().toISOString(),
+  users:state.users,
+  withdrawals:state.withdrawals,
+  tasks:TASKS,
+  history:state.history
+ };
+ const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rupapay-report.json';a.click();URL.revokeObjectURL(a.href);
+}
+function render(){
+ document.getElementById('hello')?.replaceChildren(document.createTextNode('Hi, '+state.name+' 👋'));
+ ['bal1','bal2'].forEach(id=>{if(document.getElementById(id))document.getElementById(id).textContent=money(state.balance)});
+ ['earnStat','earn2'].forEach(id=>{if(document.getElementById(id))document.getElementById(id).textContent=money(state.earnings)});
+ ['taskStat','task2'].forEach(id=>{if(document.getElementById(id))document.getElementById(id).textContent=state.completed});
+ if(document.getElementById('profName'))document.getElementById('profName').textContent=state.name;
+ if(document.getElementById('profPhone'))document.getElementById('profPhone').textContent=state.phone||'No mobile number';
+ if(document.getElementById('progress'))document.getElementById('progress').style.width=Math.min(100,state.completed/3*100)+'%';
+ const taskHTML=TASKS.map(t=>`<div class="card task"><div class="icon">${t.icon}</div><div class="grow"><h3>${t.name}</h3><p>${t.desc}</p><div class="reward">Earn ${money(t.reward)}</div></div><button class="btn primary small" onclick="doTask(${t.id})">${state.completedIds.includes(t.id)?'Done':'Start'}</button></div>`).join('');
+ if(document.getElementById('homeTasks'))document.getElementById('homeTasks').innerHTML=taskHTML;
+ if(document.getElementById('allTasks'))document.getElementById('allTasks').innerHTML=taskHTML;
+ if(document.getElementById('historyList'))document.getElementById('historyList').innerHTML=state.history.length?state.history.map(h=>`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)"><span>${h.text}<br><small class="muted">${h.date}</small></span><b class="${h.amount>=0?'success':'danger'}">${h.amount>=0?'+':''}${money(h.amount)}</b></div>`).join(''):'<p class="muted">No transactions yet.</p>';
+ if(document.getElementById('adminTaskList'))document.getElementById('adminTaskList').innerHTML=TASKS.map(t=>`<div class="card"><b>${t.icon} ${t.name}</b><p class="muted">${t.desc}</p><p class="muted">Reward: ${money(t.reward)}</p><button class="btn ghost small" onclick="deleteTask(${t.id})">Remove</button></div>`).join('');
+ ensureAdminData();
+ if(document.getElementById('adminUsersList'))document.getElementById('adminUsersList').innerHTML=state.users.map(u=>`<div class="card"><b>${u.name}</b><p class="muted">${u.phone||'No phone'} · ${u.email||'No email'}</p><span class="badge">${u.status}</span> <button class="btn ghost small" onclick="toggleUser(${u.id})">${u.status==='Active'?'Block':'Unblock'}</button></div>`).join('');
+ const pending=state.withdrawals.filter(w=>w.status==='Pending');
+ if(document.getElementById('pendingWithdrawals'))document.getElementById('pendingWithdrawals').textContent=pending.length+' Pending';
+ if(document.getElementById('adminWithdrawals'))document.getElementById('adminWithdrawals').innerHTML=state.withdrawals.length?state.withdrawals.map(w=>`<div class="card"><b>${w.user}</b><p class="muted">${money(w.amount)} · ${w.method}<br>${w.date}</p><span class="badge">${w.status}</span> ${w.status==='Pending'?`<button class="btn primary small" onclick="approveWithdrawal(${w.id})">Approve</button> <button class="btn ghost small" onclick="rejectWithdrawal(${w.id})">Reject</button>`:''}</div>`).join(''):'<div class="card"><p class="muted">No withdrawal requests.</p></div>';
+ const pendingT=state.taskApprovals.filter(t=>t.status==='Pending');
+ if(document.getElementById('pendingTasks'))document.getElementById('pendingTasks').textContent=pendingT.length+' Pending';
+ if(document.getElementById('adminApprovals'))document.getElementById('adminApprovals').innerHTML=pendingT.length?pendingT.map(t=>`<div class="card"><b>${t.icon} ${t.name}</b><p class="muted">${t.desc}<br>Reward: ${money(t.reward)}</p><button class="btn primary small" onclick="approveTask(${t.id})">Approve</button> <button class="btn ghost small" onclick="rejectTask(${t.id})">Reject</button></div>`).join(''):'<div class="card"><p class="muted">No pending task approvals.</p></div>';
+ const approvedW=state.withdrawals.filter(w=>w.status==='Approved');
+ const withdrawn=approvedW.reduce((a,w)=>a+Number(w.amount),0);
+ if(document.getElementById('reportEarnings'))document.getElementById('reportEarnings').textContent=money(state.earnings);
+ if(document.getElementById('reportWithdrawn'))document.getElementById('reportWithdrawn').textContent=money(withdrawn);
+ if(document.getElementById('reportUsers'))document.getElementById('reportUsers').textContent=state.users.length;
+ if(document.getElementById('reportTasks'))document.getElementById('reportTasks').textContent=TASKS.length;
+ if(document.getElementById('reportPending'))document.getElementById('reportPending').textContent=pending.length;
+ if(document.getElementById('reportApproved'))document.getElementById('reportApproved').textContent=approvedW.length;
+ if(document.getElementById('userCountBadge'))document.getElementById('userCountBadge').textContent=state.users.length;
+
+}
+function doTask(id){const t=TASKS.find(x=>x.id===id);if(state.completedIds.includes(id)){toast('Task already completed in demo');return}state.balance+=t.reward;state.earnings+=t.reward;state.completed++;state.completedIds.push(id);state.history.unshift({text:t.name,amount:t.reward,date:new Date().toLocaleString()});save();render();toast('Test reward added: '+money(t.reward))}
+function withdraw(){submitDemoWithdrawal()}
+function addDemoReward(){state.balance+=10;state.earnings+=10;state.history.unshift({text:'Admin test reward',amount:10,date:new Date().toLocaleString()});save();render();toast('₹10 test reward added')}
+function resetDemo(){localStorage.removeItem('rupapay_demo');localStorage.removeItem('rupapay_tasks');location.reload()}
+function adminLogin(){if(document.getElementById('adminPin').value==='123456'){show('admin');toast('Admin demo unlocked')}else toast('Wrong demo PIN')}
+function toast(t){const x=document.getElementById('toast');x.textContent=t;x.classList.remove('hidden');setTimeout(()=>x.classList.add('hidden'),2200)}
+ensureAdminData();
+// Replace placeholder Nav tags after load
+document.querySelectorAll('Nav').forEach(n=>{n.outerHTML=nav(n.getAttribute('active'))});
+render();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
